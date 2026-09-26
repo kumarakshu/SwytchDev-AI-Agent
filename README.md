@@ -73,8 +73,8 @@ SwytchDev includes 3 one-click test buttons to verify dynamic tool selection:
 
 ### 2. Installation
 ```bash
-git clone https://github.com/your-username/swytchdev-agent.git
-cd swytchdev-agent
+git clone https://github.com/kumarakshu/SwytchDev-AI-Agent.git
+cd SwytchDev-AI-Agent
 npm install
 ```
 
