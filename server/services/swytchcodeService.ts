@@ -151,7 +151,7 @@ export class SwytchcodeService {
         headers: { 'User-Agent': 'SwytchDev-AI-Agent' }
       });
 
-      if (ghResponse.data && Array.isArray(ghResponse.data) && ghResponse.data.length > 0) {
+      if (ghResponse.data && Array.isArray(ghResponse.data)) {
         const formatted: GithubIssue[] = ghResponse.data.map((item: any) => {
           const title = item.title || 'Untitled Issue';
           const labels = (item.labels || []).map((l: any) => typeof l === 'string' ? l : l.name);

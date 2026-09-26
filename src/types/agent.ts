@@ -25,6 +25,14 @@ export interface AgentStep {
   status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'skipped';
 }
 
+export interface CodePatchInfo {
+  targetRepo: string;
+  issueNumber: number;
+  issueTitle: string;
+  filePath: string;
+  diffSnippet: string;
+}
+
 export interface WorkflowResult {
   workflowId: string;
   userPrompt: string;
@@ -39,6 +47,7 @@ export interface WorkflowResult {
     jiraTicketsCreated: number;
     slackNotificationsSent: number;
   };
+  codePatch?: CodePatchInfo;
   finalOutput: string;
 }
 

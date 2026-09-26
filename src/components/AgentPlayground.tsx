@@ -408,19 +408,29 @@ export const AgentPlayground: React.FC<AgentPlaygroundProps> = ({
             {currentResult?.decisionSummary?.patchRequired ? (
               <>
                 <p className="text-xs text-slate-400">
-                  Auto-generated code fix recommendation for critical issue #101:
+                  {currentResult.codePatch 
+                    ? `Proposed code fix for ${currentResult.codePatch.targetRepo} (Issue #${currentResult.codePatch.issueNumber}):`
+                    : 'Auto-generated code fix recommendation for critical issue:'}
                 </p>
 
                 <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 font-mono-code text-[11px] text-slate-300 overflow-x-auto space-y-1">
-                  <div className="text-slate-500">// File: src/middleware/stripe-webhook-handler.ts</div>
-                  <div className="text-emerald-400">+ export async function safeWebhookHandler(req, res) &#123;</div>
-                  <div className="text-emerald-400">+   try &#123;</div>
-                  <div className="text-emerald-400">+     await processBufferWithLimit(req.body);</div>
-                  <div className="text-emerald-400">+   &#125; catch (err) &#123;</div>
-                  <div className="text-emerald-400">+     logger.error('Buffer leak prevented', err);</div>
-                  <div className="text-emerald-400">+     res.status(500).send(&#123; error: 'Recovered' &#125;);</div>
-                  <div className="text-emerald-400">+   &#125;</div>
-                  <div className="text-emerald-400">+ &#125;</div>
+                  {currentResult.codePatch ? (
+                    <pre className="text-emerald-400 whitespace-pre-wrap font-mono text-[11px]">
+                      {currentResult.codePatch.diffSnippet}
+                    </pre>
+                  ) : (
+                    <>
+                      <div className="text-slate-500">// File: src/middleware/stripe-webhook-handler.ts</div>
+                      <div className="text-emerald-400">+ export async function safeWebhookHandler(req, res) &#123;</div>
+                      <div className="text-emerald-400">+   try &#123;</div>
+                      <div className="text-emerald-400">+     await processBufferWithLimit(req.body);</div>
+                      <div className="text-emerald-400">+   &#125; catch (err) &#123;</div>
+                      <div className="text-emerald-400">+     logger.error('Buffer leak prevented', err);</div>
+                      <div className="text-emerald-400">+     res.status(500).send(&#123; error: 'Recovered' &#125;);</div>
+                      <div className="text-emerald-400">+   &#125;</div>
+                      <div className="text-emerald-400">+ &#125;</div>
+                    </>
+                  )}
                 </div>
               </>
             ) : (

@@ -260,12 +260,28 @@ export class SwytchDevAgent {
     }
 
     // STEP 6: AI CODE PATCH RECOMMENDATION (Conditional)
+    let codePatch = undefined;
     if (patchRequired && targetIssuesToProcess.length > 0) {
+      const topIssue = targetIssuesToProcess[0];
+      const fileName = topIssue.title.toLowerCase().includes('auth') || topIssue.title.toLowerCase().includes('jwt')
+        ? 'src/auth/AuthProvider.tsx'
+        : (topIssue.title.toLowerCase().includes('database') || topIssue.title.toLowerCase().includes('postgres')
+            ? 'src/db/connection.ts'
+            : 'src/services/handler.ts');
+
+      codePatch = {
+        targetRepo,
+        issueNumber: topIssue.number,
+        issueTitle: topIssue.title,
+        filePath: fileName,
+        diffSnippet: `// Repository: ${targetRepo}\n// File: ${fileName}\n// Ref Issue #${topIssue.number}: ${topIssue.title}\n+ export async function safeResolutionHandler(event: any) {\n+   try {\n+     await executeSafely(event);\n+   } catch (err) {\n+     logger.error('Resolved exception for #${topIssue.number}', err);\n+   }\n+ }`
+      };
+
       await emitStep({
         phase: 'FOLLOW_UP',
         tool: 'AI_Reasoner',
         title: 'AI Code Patch Recommendation Generated',
-        thought: `Generated proposed code fix patch for GitHub Issue #${targetIssuesToProcess[0].number}. Fix prepared in PR draft format.`,
+        thought: `Generated proposed code fix patch for GitHub Issue #${topIssue.number} in ${targetRepo} (${fileName}).`,
         status: 'completed'
       });
     }
@@ -358,6 +374,7 @@ export class SwytchDevAgent {
         jiraTicketsCreated,
         slackNotificationsSent
       },
+      codePatch,
       finalOutput: finalMessage
     };
   }
