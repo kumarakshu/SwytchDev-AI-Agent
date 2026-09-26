@@ -132,7 +132,13 @@ export const AgentPlayground: React.FC<AgentPlaygroundProps> = ({
             <textarea
               value={promptInput}
               onChange={(e) => setPromptInput(e.target.value)}
-              placeholder="Tell SwytchDev Agent what engineering task to automate..."
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit(e);
+                }
+              }}
+              placeholder="Tell SwytchDev Agent what engineering task to automate (e.g. Find critical issues in https://github.com/kumarakshu/carbon-footprint-app)..."
               rows={2}
               className="w-full pl-4 pr-36 py-3 bg-slate-950/90 rounded-xl border border-slate-700/80 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-sm font-sans resize-none"
             />
@@ -419,17 +425,9 @@ export const AgentPlayground: React.FC<AgentPlaygroundProps> = ({
                       {currentResult.codePatch.diffSnippet}
                     </pre>
                   ) : (
-                    <>
-                      <div className="text-slate-500">// File: src/middleware/stripe-webhook-handler.ts</div>
-                      <div className="text-emerald-400">+ export async function safeWebhookHandler(req, res) &#123;</div>
-                      <div className="text-emerald-400">+   try &#123;</div>
-                      <div className="text-emerald-400">+     await processBufferWithLimit(req.body);</div>
-                      <div className="text-emerald-400">+   &#125; catch (err) &#123;</div>
-                      <div className="text-emerald-400">+     logger.error('Buffer leak prevented', err);</div>
-                      <div className="text-emerald-400">+     res.status(500).send(&#123; error: 'Recovered' &#125;);</div>
-                      <div className="text-emerald-400">+   &#125;</div>
-                      <div className="text-emerald-400">+ &#125;</div>
-                    </>
+                    <div className="p-2 text-center text-xs text-amber-400 font-mono">
+                      No open critical issues found in target repo to patch.
+                    </div>
                   )}
                 </div>
               </>
