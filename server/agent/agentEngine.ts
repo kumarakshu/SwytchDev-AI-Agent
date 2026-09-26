@@ -143,16 +143,19 @@ export class SwytchDevAgent {
     });
 
     // STEP 3: TOOL 1 - GITHUB API INTEGRATION
+    const repoMatch = prompt.match(/([a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)/);
+    const targetRepo = repoMatch ? repoMatch[1] : 'kumarakshu/SwytchDev-AI-Agent';
+
     await emitStep({
       phase: 'TOOL_SELECT',
       tool: 'GitHub',
       title: 'Executing Swytchcode GitHub API Tool',
-      thought: 'Selecting tool: swytchcode_github_fetch_issues. Fetching open issues for repository: thoughtworks/swytchdev-agent.',
+      thought: `Selecting tool: swytchcode_github_fetch_issues. Fetching open issues for repository: ${targetRepo}.`,
       status: 'in_progress'
     });
 
     usedApis.add('Swytchcode GitHub API');
-    const githubResult = await this.swytchcode.fetchGithubIssues('thoughtworks/swytchdev-agent', 'open');
+    const githubResult = await this.swytchcode.fetchGithubIssues(targetRepo, 'open');
     const openIssues = githubResult.data;
     githubIssuesAnalyzed = openIssues.length;
 
@@ -160,9 +163,9 @@ export class SwytchDevAgent {
       phase: 'SWYTCHCODE_API_CALL',
       tool: 'GitHub',
       title: 'Swytchcode GitHub API Executed',
-      thought: `Retrieved ${openIssues.length} open issues from GitHub via Swytchcode API.`,
+      thought: `Retrieved ${openIssues.length} open issues from GitHub repository (${targetRepo}) via Swytchcode API (${githubResult.source}).`,
       apiDetails: {
-        endpoint: 'GET /v1/github/repos/thoughtworks/swytchdev-agent/issues',
+        endpoint: `GET /v1/github/repos/${targetRepo}/issues`,
         method: 'GET',
         headers: { Authorization: 'Bearer ••••••••••••' },
         params: { state: 'open' },

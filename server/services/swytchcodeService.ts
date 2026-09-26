@@ -129,19 +129,55 @@ export class SwytchcodeService {
   async fetchGithubIssues(repo: string = 'thoughtworks/swytchdev-agent', filter: string = 'open'): Promise<{ success: boolean; data: GithubIssue[]; source: string }> {
     console.log(`[Swytchcode API: GitHub] Fetching issues for ${repo}`);
 
+    // 1. Try Swytchcode Gateway Endpoint
     if (this.config.apiKey) {
       try {
         const response = await axios.get(`https://api.swytchcode.com/v1/github/repos/${repo}/issues`, {
           headers: { 'Authorization': `Bearer ${this.config.apiKey}` },
           params: { state: filter }
         });
-        return { success: true, data: response.data, source: 'Swytchcode Live API' };
+        if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+          return { success: true, data: response.data, source: 'Swytchcode Live API' };
+        }
       } catch (err: any) {
-        console.warn(`[Swytchcode API: GitHub] Fallback to sandbox mode due to API key context:`, err.message);
+        console.warn(`[Swytchcode API: GitHub] Swytchcode API gateway notice:`, err.message);
       }
     }
 
-    // Sandbox / High-fidelity Response
+    // 2. Try Direct Real GitHub Public REST API
+    try {
+      const ghResponse = await axios.get(`https://api.github.com/repos/${repo}/issues`, {
+        params: { state: filter, per_page: 10 },
+        headers: { 'User-Agent': 'SwytchDev-AI-Agent' }
+      });
+
+      if (ghResponse.data && Array.isArray(ghResponse.data) && ghResponse.data.length > 0) {
+        const formatted: GithubIssue[] = ghResponse.data.map((item: any) => {
+          const title = item.title || 'Untitled Issue';
+          const labels = (item.labels || []).map((l: any) => typeof l === 'string' ? l : l.name);
+          const isCritical = title.toLowerCase().includes('critical') || labels.some((l: string) => l.toLowerCase().includes('critical') || l.toLowerCase().includes('bug'));
+          const isHigh = title.toLowerCase().includes('high') || labels.some((l: string) => l.toLowerCase().includes('high'));
+          
+          return {
+            id: item.id,
+            number: item.number,
+            title: item.title,
+            body: item.body || 'No description provided.',
+            state: item.state === 'closed' ? 'closed' : 'open',
+            labels: labels,
+            user: item.user?.login || 'github-user',
+            created_at: item.created_at,
+            severity: isCritical ? 'CRITICAL' : (isHigh ? 'HIGH' : 'MEDIUM')
+          };
+        });
+
+        return { success: true, data: formatted, source: `Live GitHub REST API (${repo})` };
+      }
+    } catch (err: any) {
+      console.warn(`[GitHub Public API] Fallback to sandbox:`, err.message);
+    }
+
+    // 3. High-fidelity Sandbox Fallback
     const issues = sandboxGithubIssues.filter(i => filter === 'all' || i.state === filter);
     return { success: true, data: issues, source: 'Swytchcode API Sandbox' };
   }
