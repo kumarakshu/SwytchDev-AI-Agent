@@ -82,16 +82,18 @@ export class SwytchDevAgent {
     // 3. Slack is required if prompt explicitly asks to notify, alert, post message, or inform team
     const slackRequired = lowerPrompt.includes('slack') || lowerPrompt.includes('notify') || lowerPrompt.includes('alert') || lowerPrompt.includes('inform') || lowerPrompt.includes('broadcast');
 
-    // 4. Code Patch is generated if critical issues are escalated
-    const patchRequired = lowerPrompt.includes('fix') || lowerPrompt.includes('patch') || lowerPrompt.includes('recommendation') || lowerPrompt.includes('critical');
+    // 4. Code Patch is generated ONLY for full escalation pipelines or explicit patch/fix requests
+    const explicitPatchRequested = lowerPrompt.includes('fix') || lowerPrompt.includes('patch') || lowerPrompt.includes('recommendation');
+    const isFullEscalation = jiraRequired && slackRequired;
+    const patchRequired = explicitPatchRequested || (isFullEscalation && !isAuditOnly);
 
     let decisionReason = '';
     if (jiraRequired && slackRequired) {
-      decisionReason = 'User prompt requests full end-to-end escalation: issue triage, Jira tracking, and team notification.';
+      decisionReason = 'Full escalation requested by user (GitHub + Jira + Patch + Slack).';
     } else if (jiraRequired && !slackRequired) {
-      decisionReason = 'User prompt requests issue triage & Jira task creation. Slack notification skipped.';
+      decisionReason = 'User requested Jira synchronization only (Skipped Code Patch and Slack).';
     } else if (!jiraRequired && !slackRequired) {
-      decisionReason = 'User prompt requests read-only repository audit & issue summary. Downstream action tools (Jira, Slack) skipped.';
+      decisionReason = 'Read-only audit requested by user (Skipped Jira, Patch, and Slack mutations).';
     } else {
       decisionReason = 'Selected tools based on explicit user prompt instructions.';
     }

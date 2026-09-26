@@ -64,7 +64,7 @@ export const AgentPlayground: React.FC<AgentPlaygroundProps> = ({
   };
 
   React.useEffect(() => {
-    if (currentResult) {
+    if (currentResult && currentResult.decisionSummary?.jiraRequired && currentResult.decisionSummary?.slackRequired) {
       triggerConfetti();
     }
   }, [currentResult]);
@@ -338,6 +338,13 @@ export const AgentPlayground: React.FC<AgentPlaygroundProps> = ({
                   </div>
 
                   <div className="flex items-center justify-between">
+                    <span className="text-slate-400">• Code Patch Required:</span>
+                    <span className={currentResult.decisionSummary.patchRequired ? 'text-indigo-400 font-bold' : 'text-amber-400 font-bold'}>
+                      {currentResult.decisionSummary.patchRequired ? 'YES (Diff Generated)' : 'SKIPPED (Intent Scope)'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
                     <span className="text-slate-400">• Slack Required:</span>
                     <span className={currentResult.decisionSummary.slackRequired ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold'}>
                       {currentResult.decisionSummary.slackRequired ? 'YES (Alert Post)' : 'SKIPPED (Intent Audit)'}
@@ -394,25 +401,34 @@ export const AgentPlayground: React.FC<AgentPlaygroundProps> = ({
                 <Code2 className="w-4 h-4 text-indigo-400" /> AI Code Patch Recommendation
               </h3>
               <span className="px-2 py-0.5 text-[10px] rounded bg-slate-800 text-indigo-300 font-mono">
-                Secondary Innovation
+                {currentResult?.decisionSummary?.patchRequired ? 'Recommendation Generated' : 'Scope Filtered'}
               </span>
             </div>
 
-            <p className="text-xs text-slate-400">
-              Auto-generated code fix recommendation for critical issue #101:
-            </p>
+            {currentResult?.decisionSummary?.patchRequired ? (
+              <>
+                <p className="text-xs text-slate-400">
+                  Auto-generated code fix recommendation for critical issue #101:
+                </p>
 
-            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 font-mono-code text-[11px] text-slate-300 overflow-x-auto space-y-1">
-              <div className="text-slate-500">// File: src/middleware/stripe-webhook-handler.ts</div>
-              <div className="text-emerald-400">+ export async function safeWebhookHandler(req, res) &#123;</div>
-              <div className="text-emerald-400">+   try &#123;</div>
-              <div className="text-emerald-400">+     await processBufferWithLimit(req.body);</div>
-              <div className="text-emerald-400">+   &#125; catch (err) &#123;</div>
-              <div className="text-emerald-400">+     logger.error('Buffer leak prevented', err);</div>
-              <div className="text-emerald-400">+     res.status(500).send(&#123; error: 'Recovered' &#125;);</div>
-              <div className="text-emerald-400">+   &#125;</div>
-              <div className="text-emerald-400">+ &#125;</div>
-            </div>
+                <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 font-mono-code text-[11px] text-slate-300 overflow-x-auto space-y-1">
+                  <div className="text-slate-500">// File: src/middleware/stripe-webhook-handler.ts</div>
+                  <div className="text-emerald-400">+ export async function safeWebhookHandler(req, res) &#123;</div>
+                  <div className="text-emerald-400">+   try &#123;</div>
+                  <div className="text-emerald-400">+     await processBufferWithLimit(req.body);</div>
+                  <div className="text-emerald-400">+   &#125; catch (err) &#123;</div>
+                  <div className="text-emerald-400">+     logger.error('Buffer leak prevented', err);</div>
+                  <div className="text-emerald-400">+     res.status(500).send(&#123; error: 'Recovered' &#125;);</div>
+                  <div className="text-emerald-400">+   &#125;</div>
+                  <div className="text-emerald-400">+ &#125;</div>
+                </div>
+              </>
+            ) : (
+              <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-400 font-mono text-center space-y-1">
+                <span className="text-amber-400 font-bold block">SKIPPED (Intent Scope)</span>
+                <span>Code patch recommendation suppressed for read-only / targeted scope.</span>
+              </div>
+            )}
           </div>
 
         </div>

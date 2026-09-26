@@ -44,7 +44,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, isRunni
         <div className="hidden lg:flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-slate-800">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-800/80">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            SWYTCHCODE LIVE / SANDBOX MODE
+            SWYTCHCODE LIVE ENGINE
           </span>
 
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-slate-800 text-slate-200 border border-slate-700">
