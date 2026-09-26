@@ -143,8 +143,9 @@ export class SwytchDevAgent {
     });
 
     // STEP 3: TOOL 1 - GITHUB API INTEGRATION
-    const repoMatch = prompt.match(/([a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)/);
-    const targetRepo = repoMatch ? repoMatch[1] : 'kumarakshu/SwytchDev-AI-Agent';
+    const urlMatch = prompt.match(/(?:https?:\/\/)?(?:www\.)?github\.com\/([a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)/i);
+    const shortMatch = prompt.match(/([a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)/);
+    const targetRepo = urlMatch ? urlMatch[1] : (shortMatch ? shortMatch[1] : 'kumarakshu/SwytchDev-AI-Agent');
 
     await emitStep({
       phase: 'TOOL_SELECT',
