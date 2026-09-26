@@ -1,34 +1,44 @@
-# 🚀 SwytchDev AI - Autonomous Software Engineer for Issue-to-Action Workflows
+# 🚀 SwytchDev AI - Autonomous Software Engineer
 
 > **Buildathon Gurgaon Edition 2026 Submission**  
 > **Track 1: AI Software Engineer**  
-> *SwytchDev turns a developer's natural-language request into an agentic GitHub → Jira → Slack workflow, deciding which tools to use based on the issue context.*
+> *SwytchDev turns developer natural-language requests into dynamic, context-aware engineering workflows by intelligently orchestrating Swytchcode APIs.*
 
 ---
 
 ## 🏆 Project Overview
 
-**SwytchDev AI** reduces manual handoffs between issue investigation, task creation, and team notifications. It turns a multi-tool engineering workflow into a single natural-language interaction.
+**SwytchDev AI** automates manual engineering handoffs between repository issue investigation, task creation, code fix recommendations, and team communications.
 
-Rather than running a static, fixed sequence of API calls, **SwytchDev** acts as a dynamic reasoning agent that:
-1. **Parses** user request intent (e.g. Full escalation vs Read-only audit vs Targeted Jira sync).
-2. **Scans** open repository issues via **Swytchcode GitHub API**.
-3. **Evaluates** issue severity & triage recommendations.
-4. **Selects** downstream tools dynamically:
-   - Invokes **Swytchcode Jira API** to create tickets *only* for high/critical severity items when requested.
-   - Generates suggested AI code fix recommendations.
-   - Dispatches team digests via **Swytchcode Slack API** when requested.
-5. **Skips** unnecessary tool calls when read-only audits or partial workflows are specified.
+Rather than executing a hardcoded sequence of API calls, **SwytchDev** acts as a dynamic reasoning agent that:
+1. **Parses** user intent to analyze required action scopes (Full escalation vs Read-only audit vs Targeted task creation).
+2. **Retrieves** issue data dynamically via **Swytchcode GitHub API**.
+3. **Evaluates** root cause, stack traces, and issue severity.
+4. **Executes Downstream Actions Dynamically**:
+   - Invokes **Swytchcode Jira API** to create structured backlog tickets (`SWYTCH-402`) *only* for high/critical issues when task creation is requested.
+   - Generates non-destructive **AI Code Patch Recommendations** for developer review.
+   - Dispatches team digests via **Swytchcode Slack API** *only* when team broadcasting is requested.
+5. **Skips Unnecessary API Calls** when specified by the user's intent.
+
+---
+
+## 🗺️ Agentic Decision Matrix
+
+| User Request Scenario | Swytchcode GitHub API | Swytchcode Jira API | Swytchcode Slack API | AI Code Patch | Execution Outcome |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **Audit & Summarize** (`"Summarize open issues"`) | ✅ Executed | ❌ **Skipped** | ❌ **Skipped** | ❌ **Skipped** | Read-Only Triage Summary |
+| **Targeted Sync** (`"Create Jira ticket for issue #101"`) | ✅ Executed | ✅ Executed | ❌ **Skipped** | ❌ **Skipped** | Single Jira Task Created |
+| **Full Escalation** (`"Triage critical bugs, create Jira tasks & notify Slack"`) | ✅ Executed | ✅ Executed | ✅ Executed | ✅ Executed | Full Workflow + Slack Broadcast |
 
 ---
 
 ## 🔌 Swytchcode APIs Integrated (3+ Mandatory APIs)
 
-| Swytchcode API | Dynamic Tool Selection Trigger | Data Flow Integration |
-| :--- | :--- | :--- |
-| **Swytchcode GitHub API** | Invoked when repository or issue context is required. | Issues feed into AI Severity & Triage Evaluator. |
-| **Swytchcode Jira API** | Executed dynamically when task tracking/escalation is requested. | Transforms GitHub issue details into structured Jira backlog tickets (`SWYTCH-402`). |
-| **Swytchcode Slack API** | Executed dynamically when team alerts/broadcasts are requested. | Dispatches rich digests with Jira ticket references & AI patch suggestions. |
+| Swytchcode API | Trigger Condition | Data Flow & Action | Live API Endpoint |
+| :--- | :--- | :--- | :--- |
+| **Swytchcode GitHub API** | Context required for repo issues. | Fetches open issues, bodies, stack traces, and labels. | `GET /v1/github/repos/:repo/issues` |
+| **Swytchcode Jira API** | Escalation / task tracking requested. | Creates structured Jira backlog tickets with priority mapping. | `POST /v1/jira/issue` |
+| **Swytchcode Slack API** | Team alert / digest requested. | Posts formatted rich alerts with Jira keys & AI patch suggestions to `#dev-alerts`. | `POST /v1/slack/chat.postMessage` |
 
 ---
 
@@ -37,7 +47,7 @@ Rather than running a static, fixed sequence of API calls, **SwytchDev** acts as
 ```mermaid
 graph TD
     A[User Request] --> B[Intent & Planner Engine]
-    B -->|Always| C[Swytchcode GitHub API]
+    B -->|Context Required| C[Swytchcode GitHub API]
     C -->|Retrieve Issues| D[AI Triage & Severity Assessor]
     D -->|Evaluate Severity| E{Is Jira Required?}
     E -->|YES: Critical/High| F[Swytchcode Jira API]
@@ -52,16 +62,42 @@ graph TD
 
 ---
 
+## 🖼️ Visual Screenshots & Evidence
+
+| Component | Visual Demonstration |
+| :--- | :--- |
+| **Agent Playground & Decision Log** | ![Agent Playground](docs/screenshots/agent_playground.png) |
+| **Swytchcode API Telemetry & Payload Inspector** | ![API Telemetry](docs/screenshots/telemetry.png) |
+| **Jira Backlog Board Integration** | ![Jira Board](docs/screenshots/jira_board.png) |
+| **Slack Broadcast Feed Integration** | ![Slack Feed](docs/screenshots/slack_feed.png) |
+
+---
+
 ## 🧪 Verification & Judge Test Scenarios
 
-SwytchDev includes 3 one-click test buttons to verify dynamic tool selection:
+SwytchDev includes preset test scenarios to prove dynamic decision making:
 
 - **TEST 1 — Full Escalation Pipeline**: `"Find critical GitHub issues, create Jira tickets and notify Slack."`  
-  *Executed*: GitHub ✓ • Jira ✓ • Slack ✓
+  *Executed*: GitHub ✓ • Jira ✓ • Slack ✓ • AI Patch ✓
 - **TEST 2 — Read-Only Audit**: `"Find the critical issues in repository and summarize them."`  
   *Executed*: GitHub ✓ • Jira ✗ (Skipped) • Slack ✗ (Skipped)
 - **TEST 3 — Targeted Sync**: `"Create a Jira ticket for GitHub issue #101."`  
   *Executed*: GitHub ✓ • Jira ✓ • Slack ✗ (Skipped)
+
+---
+
+## 🛡️ Security, Governance & Code Patch Safety
+
+- **Human-in-the-Loop Patch Review**: SwytchDev generates **AI Code Patch Recommendations** for developer review rather than auto-merging pull requests into production repositories.
+- **Authorization Token Masking**: All API authorization headers and secrets are automatically masked in the Telemetry Inspector (`Bearer ************`).
+- **Zero Hardcoded Secrets**: Project relies on `.env` or automatic high-fidelity **Swytchcode API Sandbox** fallback mode.
+
+---
+
+## 🧪 Graceful Failure & Edge Case Handling
+
+- **Non-existent Resource Requests**: When prompted with non-existent issue numbers, the agent gracefully returns a clean 404 notice without creating redundant Jira tickets or Slack spam.
+- **Prompt Injection Defense**: User prompts and retrieved GitHub payloads are treated strictly as untrusted data inputs, preventing malicious instruction overrides.
 
 ---
 
@@ -79,14 +115,13 @@ npm install
 ```
 
 ### 3. Environment Variables (Optional)
-Create `.env` file in project root:
-```env
-PORT=3001
-SWYTCHCODE_API_KEY=your_swytchcode_api_key_here
+Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
 ```
 *(If no API key is provided, SwytchDev automatically runs in high-fidelity Swytchcode API Sandbox mode).*
 
-### 4. Run Dev Server
+### 4. Run Development Server
 ```bash
 npm run dev
 ```
